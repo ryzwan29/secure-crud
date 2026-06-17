@@ -4,16 +4,16 @@ services:
     container_name: secure_crud_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: crud_user
+      POSTGRES_USER: admin_crud
       POSTGRES_PASSWORD: change_me_strong_password
-      POSTGRES_DB: secure_crud_db
+      POSTGRES_DB: db_website_crud
     ports:
       - "5432:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
       - ./backend/src/database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U crud_user -d secure_crud_db"]
+      test: ["CMD-SHELL", "pg_isready -U admin_crud -d db_website_crud"]
       interval: 5s
       timeout: 5s
       retries: 5
