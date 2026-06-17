@@ -16,7 +16,7 @@ export function UsersPage() {
     try {
       setUsers(await usersApi.list());
     } catch (error) {
-      toast.error(extractErrorMessage(error, "Gagal memuat daftar user"));
+      toast.error(extractErrorMessage(error, "Failed to load user list"));
     } finally {
       setIsLoading(false);
     }
@@ -30,9 +30,9 @@ export function UsersPage() {
     try {
       const updated = await usersApi.updateRole(id, role);
       setUsers((prev) => prev.map((u) => (u.id === id ? updated : u)));
-      toast.success("Role berhasil diubah");
+      toast.success("Role updated successfully");
     } catch (error) {
-      toast.error(extractErrorMessage(error, "Gagal mengubah role"));
+      toast.error(extractErrorMessage(error, "Failed to update role"));
     }
   }
 
@@ -40,17 +40,17 @@ export function UsersPage() {
     try {
       const updated = await usersApi.setActive(id, isActive);
       setUsers((prev) => prev.map((u) => (u.id === id ? updated : u)));
-      toast.success(isActive ? "User diaktifkan" : "User dinonaktifkan");
+      toast.success(isActive ? "User activated" : "User deactivated");
     } catch (error) {
-      toast.error(extractErrorMessage(error, "Gagal mengubah status user"));
+      toast.error(extractErrorMessage(error, "Failed to update user status"));
     }
   }
 
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-xl font-semibold text-ink-900">Manajemen User</h1>
-        <p className="text-sm text-ink-500">Kelola role dan status aktif setiap user (khusus admin).</p>
+        <h1 className="text-xl font-semibold text-ink-900">User Management</h1>
+        <p className="text-sm text-ink-500">Manage each user's role and active status (admin only).</p>
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-surface-border bg-white shadow-card">
@@ -74,13 +74,13 @@ export function UsersPage() {
                 return (
                   <tr key={u.id}>
                     <td className="px-5 py-3 font-medium text-ink-900">
-                      {u.username} {isSelf && <Badge tone="brand">Kamu</Badge>}
+                      {u.username} {isSelf && <Badge tone="brand">You</Badge>}
                     </td>
                     <td className="px-5 py-3 text-ink-700">{u.email}</td>
                     <td className="px-5 py-3">
                       <Select
                         label=""
-                        aria-label={`Role untuk ${u.username}`}
+                        aria-label={`Role for ${u.username}`}
                         options={[
                           { value: "user", label: "User" },
                           { value: "admin", label: "Admin" },
@@ -98,7 +98,7 @@ export function UsersPage() {
                         className="disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <Badge tone={u.is_active ? "success" : "danger"}>
-                          {u.is_active ? "Aktif" : "Nonaktif"}
+                          {u.is_active ? "Active" : "Inactive"}
                         </Badge>
                       </button>
                     </td>

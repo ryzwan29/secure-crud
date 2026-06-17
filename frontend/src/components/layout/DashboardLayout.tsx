@@ -4,8 +4,8 @@ import { useAuth } from "../../hooks/useAuth";
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutGrid, adminOnly: false },
-  { to: "/dashboard/products", label: "Produk", icon: Package, adminOnly: false },
-  { to: "/dashboard/users", label: "Manajemen User", icon: Users, adminOnly: true },
+  { to: "/dashboard/products", label: "Products", icon: Package, adminOnly: false },
+  { to: "/dashboard/users", label: "User Management", icon: Users, adminOnly: true },
 ];
 
 export function DashboardLayout() {
@@ -19,7 +19,7 @@ export function DashboardLayout() {
           <span className="text-sm font-semibold text-ink-900">Secure CRUD Admin</span>
         </div>
 
-        <nav className="flex flex-1 flex-col gap-1" aria-label="Navigasi utama">
+        <nav className="flex flex-1 flex-col gap-1" aria-label="Main navigation">
           {navItems
             .filter((item) => !item.adminOnly || user?.role === "admin")
             .map((item) => (
@@ -51,7 +51,7 @@ export function DashboardLayout() {
       <div className="flex flex-1 flex-col">
         <header className="flex h-16 items-center justify-between border-b border-surface-border bg-white px-6">
           <p className="text-sm text-ink-500">
-            Masuk sebagai <span className="font-medium text-ink-900">{user?.username}</span>
+            Signed in as <span className="font-medium text-ink-900">{user?.username}</span>
           </p>
           <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700">
             {user?.role === "admin" ? "Admin" : "User"}

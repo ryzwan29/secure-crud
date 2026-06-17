@@ -20,7 +20,7 @@ export function LoginPage() {
       await login({ email, password });
       navigate("/dashboard");
     } catch (error) {
-      toast.error(extractErrorMessage(error, "Login gagal"));
+      toast.error(extractErrorMessage(error, "Login failed"));
     } finally {
       setIsLoading(false);
     }
@@ -31,7 +31,7 @@ export function LoginPage() {
       <div className="w-full max-w-sm rounded-xl border border-surface-border bg-white p-8 shadow-card">
         <div className="mb-6 flex flex-col items-center gap-2 text-center">
           <ShieldCheck className="h-8 w-8 text-brand-600" aria-hidden="true" />
-          <h1 className="text-lg font-semibold text-ink-900">Masuk ke akun</h1>
+          <h1 className="text-lg font-semibold text-ink-900">Sign in to your account</h1>
           <p className="text-sm text-ink-500">Secure CRUD Admin</p>
         </div>
 
@@ -55,14 +55,14 @@ export function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
           />
           <Button type="submit" isLoading={isLoading} className="mt-2 w-full">
-            Masuk
+            Sign in
           </Button>
         </form>
 
         <p className="mt-6 text-center text-sm text-ink-500">
-          Belum punya akun?{" "}
+          Don't have an account?{" "}
           <Link to="/register" className="font-medium text-brand-600 hover:underline">
-            Daftar
+            Sign up
           </Link>
         </p>
       </div>

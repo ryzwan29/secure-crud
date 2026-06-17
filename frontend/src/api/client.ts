@@ -65,7 +65,7 @@ apiClient.interceptors.response.use(
   }
 );
 
-export function extractErrorMessage(error: unknown, fallback = "Terjadi kesalahan"): string {
+export function extractErrorMessage(error: unknown, fallback = "An error occurred"): string {
   if (axios.isAxiosError(error)) {
     return (error.response?.data as { message?: string } | undefined)?.message ?? fallback;
   }

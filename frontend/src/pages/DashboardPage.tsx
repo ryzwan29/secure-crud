@@ -15,8 +15,8 @@ export function DashboardPage() {
   }, []);
 
   const stats = [
-    { label: "Total Produk", value: productCount ?? "—", icon: Package },
-    { label: "Role Kamu", value: user?.role === "admin" ? "Admin" : "User", icon: ShieldCheck },
+    { label: "Total Products", value: productCount ?? "—", icon: Package },
+    { label: "Your Role", value: user?.role === "admin" ? "Admin" : "User", icon: ShieldCheck },
     { label: "Username", value: user?.username ?? "—", icon: UserCircle },
   ];
 
@@ -24,7 +24,7 @@ export function DashboardPage() {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-xl font-semibold text-ink-900">Dashboard</h1>
-        <p className="text-sm text-ink-500">Ringkasan singkat akun dan data kamu.</p>
+        <p className="text-sm text-ink-500">A quick summary of your account and data.</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">

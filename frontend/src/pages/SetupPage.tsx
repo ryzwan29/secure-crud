@@ -24,10 +24,10 @@ export function SetupPage() {
     setIsLoading(true);
     try {
       await authApi.setup(form);
-      toast.success("Admin berhasil dibuat, silakan masuk");
+      toast.success("Admin account created successfully, please sign in");
       navigate("/login", { replace: true });
     } catch (error) {
-      toast.error(extractErrorMessage(error, "Setup gagal"));
+      toast.error(extractErrorMessage(error, "Setup failed"));
     } finally {
       setIsLoading(false);
     }
@@ -40,8 +40,8 @@ export function SetupPage() {
       <div className="w-full max-w-sm rounded-xl border border-surface-border bg-white p-8 shadow-card">
         <div className="mb-6 flex flex-col items-center gap-2 text-center">
           <Settings className="h-8 w-8 text-brand-600" aria-hidden="true" />
-          <h1 className="text-lg font-semibold text-ink-900">Setup Admin</h1>
-          <p className="text-sm text-ink-500">Buat akun admin pertama untuk mulai menggunakan aplikasi.</p>
+          <h1 className="text-lg font-semibold text-ink-900">Admin Setup</h1>
+          <p className="text-sm text-ink-500">Create the first admin account to start using the application.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -68,12 +68,12 @@ export function SetupPage() {
             name="password"
             autoComplete="new-password"
             required
-            hint="Minimal 8 karakter, kombinasi huruf besar, kecil, angka, dan simbol."
+            hint="Minimum 8 characters, with a mix of uppercase, lowercase, numbers, and symbols."
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
           />
           <Button type="submit" isLoading={isLoading} className="mt-2 w-full">
-            Buat Admin
+            Create Admin
           </Button>
         </form>
       </div>

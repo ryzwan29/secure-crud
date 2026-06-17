@@ -45,7 +45,7 @@ export function Modal({ isOpen, onClose, title, children, footer }: ModalProps) 
           <button
             ref={closeButtonRef}
             onClick={onClose}
-            aria-label="Tutup dialog"
+            aria-label="Close dialog"
             className="rounded-md p-1.5 text-ink-500 hover:bg-surface-subtle"
           >
             <X className="h-5 w-5" />

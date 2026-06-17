@@ -32,7 +32,7 @@ export function ProductsPage() {
       setProducts(result.items);
       setTotalPages(result.totalPages);
     } catch (error) {
-      toast.error(extractErrorMessage(error, "Gagal memuat produk"));
+      toast.error(extractErrorMessage(error, "Failed to load products"));
     } finally {
       setIsLoading(false);
     }
@@ -73,15 +73,15 @@ export function ProductsPage() {
     try {
       if (editingId) {
         await productsApi.update(editingId, form);
-        toast.success("Produk berhasil diperbarui");
+        toast.success("Product updated successfully");
       } else {
         await productsApi.create(form);
-        toast.success("Produk berhasil ditambahkan");
+        toast.success("Product added successfully");
       }
       setModalOpen(false);
       loadProducts();
     } catch (error) {
-      toast.error(extractErrorMessage(error, "Gagal menyimpan produk"));
+      toast.error(extractErrorMessage(error, "Failed to save product"));
     } finally {
       setIsSaving(false);
     }
@@ -91,11 +91,11 @@ export function ProductsPage() {
     if (!deleteTarget) return;
     try {
       await productsApi.remove(deleteTarget.id);
-      toast.success("Produk dihapus");
+      toast.success("Product deleted");
       setDeleteTarget(null);
       loadProducts();
     } catch (error) {
-      toast.error(extractErrorMessage(error, "Gagal menghapus produk"));
+      toast.error(extractErrorMessage(error, "Failed to delete product"));
     }
   }
 
@@ -107,20 +107,20 @@ export function ProductsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-ink-900">Produk</h1>
-          <p className="text-sm text-ink-500">Kelola data produk — tambah, ubah, hapus.</p>
+          <h1 className="text-xl font-semibold text-ink-900">Products</h1>
+          <p className="text-sm text-ink-500">Manage product data — add, edit, delete.</p>
         </div>
         <Button onClick={openCreateModal}>
           <Plus className="h-4 w-4" aria-hidden="true" />
-          Tambah Produk
+          Add Product
         </Button>
       </div>
 
       <form onSubmit={handleSearchSubmit} className="flex max-w-sm gap-2">
         <Input
-          label="Cari produk"
+          label="Search products"
           name="search"
-          placeholder="Nama produk..."
+          placeholder="Product name..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="!min-h-[44px]"
@@ -136,16 +136,16 @@ export function ProductsPage() {
             <Spinner />
           </div>
         ) : products.length === 0 ? (
-          <EmptyState title="Belum ada produk" description="Tambahkan produk pertama kamu." />
+          <EmptyState title="No products yet" description="Add your first product." />
         ) : (
           <table className="w-full text-left text-sm">
             <thead className="border-b border-surface-border bg-surface-subtle text-xs uppercase text-ink-500">
               <tr>
-                <th className="px-5 py-3 font-medium">Nama</th>
-                <th className="px-5 py-3 font-medium">Kategori</th>
-                <th className="px-5 py-3 font-medium tabular-nums">Harga</th>
-                <th className="px-5 py-3 font-medium tabular-nums">Stok</th>
-                <th className="px-5 py-3 font-medium">Aksi</th>
+                <th className="px-5 py-3 font-medium">Name</th>
+                <th className="px-5 py-3 font-medium">Category</th>
+                <th className="px-5 py-3 font-medium tabular-nums">Price</th>
+                <th className="px-5 py-3 font-medium tabular-nums">Stock</th>
+                <th className="px-5 py-3 font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-border">
@@ -162,21 +162,21 @@ export function ProductsPage() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => openEditModal(product)}
-                          aria-label={`Ubah ${product.name}`}
+                          aria-label={`Edit ${product.name}`}
                           className="rounded-md p-2 text-ink-500 hover:bg-surface-subtle hover:text-brand-600"
                         >
                           <Pencil className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => setDeleteTarget(product)}
-                          aria-label={`Hapus ${product.name}`}
+                          aria-label={`Delete ${product.name}`}
                           className="rounded-md p-2 text-ink-500 hover:bg-danger-50 hover:text-danger-600"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                     ) : (
-                      <span className="text-xs text-ink-500">Bukan milikmu</span>
+                      <span className="text-xs text-ink-500">Not yours</span>
                     )}
                   </td>
                 </tr>
@@ -189,13 +189,13 @@ export function ProductsPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2">
           <Button variant="secondary" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
-            Sebelumnya
+            Previous
           </Button>
           <span className="text-sm text-ink-500">
-            Halaman {page} dari {totalPages}
+            Page {page} of {totalPages}
           </span>
           <Button variant="secondary" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
-            Selanjutnya
+            Next
           </Button>
         </div>
       )}
@@ -203,25 +203,25 @@ export function ProductsPage() {
       <Modal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editingId ? "Ubah Produk" : "Tambah Produk"}
+        title={editingId ? "Edit Product" : "Add Product"}
       >
         <form onSubmit={handleSave} className="flex flex-col gap-4">
           <Input
-            label="Nama Produk"
+            label="Product Name"
             name="name"
             required
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
           />
           <Input
-            label="Kategori"
+            label="Category"
             name="category"
             value={form.category}
             onChange={(e) => setForm({ ...form, category: e.target.value })}
           />
           <div className="grid grid-cols-2 gap-4">
             <Input
-              label="Harga"
+              label="Price"
               name="price"
               type="number"
               min={0}
@@ -231,7 +231,7 @@ export function ProductsPage() {
               onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
             />
             <Input
-              label="Stok"
+              label="Stock"
               name="stock"
               type="number"
               min={0}
@@ -241,17 +241,17 @@ export function ProductsPage() {
             />
           </div>
           <Input
-            label="Deskripsi"
+            label="Description"
             name="description"
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
           />
           <div className="mt-2 flex justify-end gap-3">
             <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>
-              Batal
+              Cancel
             </Button>
             <Button type="submit" isLoading={isSaving}>
-              Simpan
+              Save
             </Button>
           </div>
         </form>
@@ -260,21 +260,21 @@ export function ProductsPage() {
       <Modal
         isOpen={Boolean(deleteTarget)}
         onClose={() => setDeleteTarget(null)}
-        title="Hapus produk?"
+        title="Delete product?"
         footer={
           <>
             <Button variant="secondary" onClick={() => setDeleteTarget(null)}>
-              Batal
+              Cancel
             </Button>
             <Button variant="danger" onClick={handleDelete}>
-              Hapus
+              Delete
             </Button>
           </>
         }
       >
         <p className="text-sm text-ink-700">
-          Produk <span className="font-medium">{deleteTarget?.name}</span> akan dihapus permanen. Aksi ini tidak
-          bisa dibatalkan.
+          Product <span className="font-medium">{deleteTarget?.name}</span> will be permanently deleted. This
+          action cannot be undone.
         </p>
       </Modal>
     </div>
