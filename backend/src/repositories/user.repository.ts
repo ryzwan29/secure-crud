@@ -26,10 +26,27 @@ export const userRepository = {
     return rows[0] ?? null;
   },
 
+  async countAdmins(): Promise<number> {
+    const { rows } = await pool.query<{ count: string }>(
+      "SELECT COUNT(*)::int AS count FROM users WHERE role = 'admin'"
+    );
+    return parseInt(rows[0].count, 10);
+  },
+
   async create(input: { username: string; email: string; passwordHash: string }): Promise<User> {
     const { rows } = await pool.query<User>(
       `INSERT INTO users (username, email, password_hash)
        VALUES ($1, $2, $3)
+       RETURNING *`,
+      [input.username, input.email, input.passwordHash]
+    );
+    return rows[0];
+  },
+
+  async createAdmin(input: { username: string; email: string; passwordHash: string }): Promise<User> {
+    const { rows } = await pool.query<User>(
+      `INSERT INTO users (username, email, password_hash, role)
+       VALUES ($1, $2, $3, 'admin')
        RETURNING *`,
       [input.username, input.email, input.passwordHash]
     );

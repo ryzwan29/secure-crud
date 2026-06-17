@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { LoginPage } from "../pages/LoginPage";
 import { RegisterPage } from "../pages/RegisterPage";
+import { SetupPage } from "../pages/SetupPage";
 import { DashboardPage } from "../pages/DashboardPage";
 import { ProductsPage } from "../pages/ProductsPage";
 import { UsersPage } from "../pages/UsersPage";
@@ -10,6 +11,7 @@ import { ProtectedRoute } from "../components/ProtectedRoute";
 
 export const router = createBrowserRouter([
   { path: "/", element: <Navigate to="/dashboard" replace /> },
+  { path: "/setup", element: <SetupPage /> },
   { path: "/login", element: <LoginPage /> },
   { path: "/register", element: <RegisterPage /> },
   {

@@ -18,6 +18,16 @@ function getContext(req: Request) {
 }
 
 export const authController = {
+  checkSetup: asyncHandler(async (_req: Request, res: Response) => {
+    const required = await authService.isSetupRequired();
+    res.status(200).json({ success: true, data: { setupRequired: required } });
+  }),
+
+  setup: asyncHandler(async (req: Request, res: Response) => {
+    const user = await authService.setup(req.body, getContext(req));
+    res.status(201).json({ success: true, data: user });
+  }),
+
   register: asyncHandler(async (req: Request, res: Response) => {
     const user = await authService.register(req.body, getContext(req));
     res.status(201).json({ success: true, data: user });

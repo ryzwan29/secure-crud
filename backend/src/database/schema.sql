@@ -88,14 +88,3 @@ DROP TRIGGER IF EXISTS trg_products_updated_at ON products;
 CREATE TRIGGER trg_products_updated_at
   BEFORE UPDATE ON products
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
-
--- ---------- Seed: default admin (email: admin@example.com / password: Admin123!) ----------
--- Hashed in-database with bcrypt (pgcrypto) — never store plaintext passwords.
-INSERT INTO users (username, email, password_hash, role)
-VALUES (
-  'admin',
-  'admin@example.com',
-  crypt('Admin123!', gen_salt('bf', 12)),
-  'admin'
-)
-ON CONFLICT (email) DO NOTHING;

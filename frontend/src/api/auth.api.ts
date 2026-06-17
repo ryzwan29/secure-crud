@@ -12,6 +12,16 @@ export interface RegisterPayload {
 }
 
 export const authApi = {
+  async checkSetup(): Promise<boolean> {
+    const { data } = await apiClient.get<ApiSuccess<{ setupRequired: boolean }>>("/auth/setup");
+    return data.data.setupRequired;
+  },
+
+  async setup(payload: RegisterPayload) {
+    const { data } = await apiClient.post<ApiSuccess<SafeUser>>("/auth/setup", payload);
+    return data.data;
+  },
+
   async login(payload: LoginPayload) {
     const { data } = await apiClient.post<ApiSuccess<{ user: SafeUser; accessToken: string }>>(
       "/auth/login",

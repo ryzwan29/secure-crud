@@ -17,7 +17,6 @@ function toSafeUser(user: User): SafeUser {
 }
 
 function refreshExpiryDate(): Date {
-  // Mirrors JWT_REFRESH_EXPIRES_IN (default 7d); used for DB-side revocation tracking.
   const days = parseInt(env.JWT_REFRESH_EXPIRES_IN.replace(/\D/g, ""), 10) || 7;
   return new Date(Date.now() + days * 24 * 60 * 60 * 1000);
 }
@@ -28,6 +27,35 @@ interface RequestContext {
 }
 
 export const authService = {
+  async isSetupRequired(): Promise<boolean> {
+    const admins = await userRepository.countAdmins();
+    return admins === 0;
+  },
+
+  async setup(input: RegisterInput, ctx: RequestContext) {
+    const admins = await userRepository.countAdmins();
+    if (admins > 0) throw ApiError.forbidden("Setup sudah dilakukan");
+
+    const existingEmail = await userRepository.findByEmail(input.email);
+    if (existingEmail) throw ApiError.conflict("Email sudah terdaftar");
+
+    const existingUsername = await userRepository.findByUsername(input.username);
+    if (existingUsername) throw ApiError.conflict("Username sudah dipakai");
+
+    const passwordHash = await hashPassword(input.password);
+    const user = await userRepository.createAdmin({
+      username: input.username,
+      email: input.email,
+      passwordHash,
+    });
+
+    auditLogRepository
+      .record({ userId: user.id, action: "SETUP_ADMIN", tableName: "users", recordId: user.id, ipAddress: ctx.ip, userAgent: ctx.userAgent })
+      .catch((e) => logger.error("audit log failed", { e: String(e) }));
+
+    return toSafeUser(user);
+  },
+
   async register(input: RegisterInput, ctx: RequestContext) {
     const existingEmail = await userRepository.findByEmail(input.email);
     if (existingEmail) throw ApiError.conflict("Email sudah terdaftar");
@@ -52,8 +80,6 @@ export const authService = {
   async login(input: LoginInput, ctx: RequestContext) {
     const user = await userRepository.findByEmail(input.email);
 
-    // Generic message regardless of failure reason — avoids leaking
-    // whether an email exists (user enumeration protection).
     const genericError = () => ApiError.unauthorized("Email atau password salah");
 
     if (!user) throw genericError();
@@ -111,7 +137,6 @@ export const authService = {
     const user = await userRepository.findById(payload.sub);
     if (!user || !user.is_active) throw ApiError.unauthorized("User tidak ditemukan atau nonaktif");
 
-    // Rotate: revoke the old refresh token, issue a brand new pair.
     await refreshTokenRepository.revoke(tokenHash);
     const newPayload = { sub: user.id, role: user.role };
     const newAccessToken = signAccessToken(newPayload);
