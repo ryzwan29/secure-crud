@@ -4,9 +4,8 @@ module.exports = {
       name: "secure-crud-backend",
       script: "dist/server.js",
       cwd: "./backend",
-      instances: "1",
-      exec_mode: "cluster",
-      node_args: "--max-old-space-size=512",
+      instances: 1,
+      exec_mode: "fork",
 
       // Environment: production
       env_production: {
@@ -35,7 +34,7 @@ module.exports = {
 
       // Graceful shutdown
       kill_timeout: 5000,
-      wait_ready: true,
+      wait_ready: false,
       listen_timeout: 10000,
     },
   ],
