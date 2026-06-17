@@ -15,6 +15,14 @@ export function Modal({ isOpen, onClose, title, children, footer }: ModalProps) 
   useEffect(() => {
     if (!isOpen) return;
     closeButtonRef.current?.focus();
+    // Only run when the modal transitions open — not on every re-render where
+    // a new onClose function identity gets passed in (e.g. typing in a form
+    // causes the parent to re-render with a fresh inline arrow function).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
 
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
