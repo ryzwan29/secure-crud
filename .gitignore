@@ -1,0 +1,60 @@
+# ============================================================
+# .gitignore — Secure CRUD App (Monorepo)
+# Stack: Node.js · TypeScript · Express · React · Vite · PostgreSQL
+# ============================================================
+
+# ── Dependencies ─────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# ── Build Output ─────────────────────────────────────────────
+dist/
+build/
+out/
+.vite/
+
+# ── Environment & Secrets ────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Logs ─────────────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ── PM2 ──────────────────────────────────────────────────────
+.pm2/
+
+# ── TypeScript ───────────────────────────────────────────────
+*.tsbuildinfo
+
+# ── OS Files ─────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Editor & IDE ─────────────────────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ── Testing ──────────────────────────────────────────────────
+coverage/
+.nyc_output/
+
+# ── Docker ───────────────────────────────────────────────────
+.docker/
+
+# ── Misc ─────────────────────────────────────────────────────
+.cache/
+*.local
