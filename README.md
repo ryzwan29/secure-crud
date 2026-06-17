@@ -1,26 +1,26 @@
 # Secure CRUD App
 
-Aplikasi CRUD full-stack untuk tugas **Database Server & CRUD Security** — TypeScript + React + Node.js (Express) + PostgreSQL.
+A full-stack CRUD application for the **Database Server & CRUD Security** assignment — TypeScript + React + Node.js (Express) + PostgreSQL.
 
-Demo case: sistem manajemen **Produk** dengan autentikasi user, role-based access control (admin/user), dan audit log — supaya security concept-nya kelihatan jelas, bukan cuma CRUD polos.
+Demo case: a **Product** management system with user authentication, role-based access control (admin/user), and an audit log — so the security concepts are visible and concrete, not just plain CRUD.
 
-## Struktur Folder
+## Folder Structure
 
 ```
 secure-crud-app/
 ├── backend/                  # REST API (Express + TypeScript)
 │   ├── src/
-│   │   ├── config/           # env loader, koneksi database
+│   │   ├── config/           # env loader, database connection
 │   │   ├── controllers/      # HTTP layer (request/response)
 │   │   ├── services/         # business logic + authorization rules
-│   │   ├── repositories/     # query SQL ter-parameterisasi
+│   │   ├── repositories/     # parameterized SQL queries
 │   │   ├── middlewares/      # auth, validate, rate-limit, error handler
-│   │   ├── validators/       # Zod schema
+│   │   ├── validators/       # Zod schemas
 │   │   ├── routes/
 │   │   ├── utils/            # jwt, password hashing, logger, ApiError
 │   │   ├── types/
 │   │   ├── database/
-│   │   │   └── schema.sql    # DDL + seed admin user
+│   │   │   └── schema.sql    # DDL (tables, indexes, triggers) — no seed
 │   │   ├── app.ts
 │   │   └── server.ts
 │   ├── .env.example
@@ -28,17 +28,17 @@ secure-crud-app/
 ├── frontend/                 # React SPA (Vite + TypeScript + Tailwind)
 │   ├── src/
 │   │   ├── api/              # axios client + endpoint wrappers
-│   │   ├── components/       # ui primitives, layout, route guard
+│   │   ├── components/       # ui primitives, layout, modal, route guard
 │   │   ├── context/          # AuthContext
 │   │   ├── hooks/
-│   │   ├── pages/             # Login, Register, Dashboard, Products, Users
+│   │   ├── pages/            # Setup, Login, Register, Dashboard, Products, Users
 │   │   ├── router/
 │   │   └── types/
 │   └── package.json
-└── docker-compose.yml         # PostgreSQL lokal, auto-init schema.sql
+└── docker-compose.yml        # Local PostgreSQL, auto-init schema.sql
 ```
 
-## Cara Jalanin
+## Getting Started
 
 ### 1. Database
 
@@ -46,20 +46,20 @@ secure-crud-app/
 docker compose up -d
 ```
 
-Ini bakal jalanin PostgreSQL di `localhost:5432` dan otomatis menjalankan `backend/src/database/schema.sql` (bikin tabel + seed admin user) saat container pertama kali dibuat.
+This starts PostgreSQL on `localhost:5432` and automatically runs `backend/src/database/schema.sql` (creates tables, indexes, and triggers) on first boot.
 
-> Kalau nggak pakai Docker, jalankan isi `schema.sql` manual lewat `psql` ke database kamu sendiri.
+> Without Docker, run `schema.sql` manually via `psql` against your own database. See [INSTALLATION.md](./INSTALLATION.md) for a full Ubuntu 24.04 setup guide.
 
 ### 2. Backend
 
 ```bash
 cd backend
-cp .env.example .env     # sesuaikan DATABASE_URL, JWT secrets, dst
+cp .env.example .env     # set DATABASE_URL, JWT secrets, etc.
 npm install
-npm run dev               # http://localhost:4000
+npm run dev               # http://localhost:4002
 ```
 
-**Wajib diganti sebelum production:** `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` (generate random string panjang, jangan dipakai bareng), dan password database di `docker-compose.yml`.
+**Required before production:** change `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` (use long random strings, never reuse between environments), and the database password in `docker-compose.yml`.
 
 ### 3. Frontend
 
@@ -69,47 +69,50 @@ npm install
 npm run dev               # http://localhost:5173
 ```
 
-Vite dev server sudah di-proxy ke `/api` → `localhost:4000`, jadi nggak perlu setup CORS tambahan saat development.
+The Vite dev server already proxies `/api` → `localhost:4000`, so no extra CORS configuration is needed during development.
 
-### Login default
+### 4. First-Run Setup
 
-| Email | Password | Role |
+There is no pre-seeded admin account. On first visit, the app detects that no admin exists and automatically redirects to `/setup`, where you create the first admin account. After that, the setup page is permanently disabled.
+
+If you prefer to skip the web UI, you can create an admin directly via the API:
+
+```bash
+curl -X POST http://localhost:4002/api/auth/setup \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","email":"admin@example.com","password":"Admin123!!"}'
+```
+
+## Implemented Security Features
+
+- **Password hashing** — bcrypt (cost factor 12) via `bcryptjs` in Node; the same `pgcrypto` extension is available in the database if you need in-DB hashing.
+- **Dual-token JWT auth** — short-lived access token (kept in memory on the client, never written to localStorage) + refresh token (httpOnly, `SameSite=Strict` cookie, stored as a hash in `refresh_tokens` for server-side revocation, rotated on every refresh).
+- **Role-based + ownership authorization** — admins can access all data; regular users can only update/delete their own products (enforced in the service layer, not just the UI).
+- **Input validation** — all request body/query/params are validated and sanitized with Zod before reaching business logic.
+- **SQL injection prevention** — all database queries use parameterized statements (`$1, $2, ...`), no string concatenation into SQL.
+- **Account lockout** — account is automatically locked for 15 minutes after 5 consecutive failed login attempts.
+- **Rate limiting** — auth endpoints are limited more aggressively (10 req/15 min) than general endpoints (100 req/15 min) to mitigate brute-force attacks.
+- **Generic auth error messages** — login failures always return the same message regardless of whether email or password was wrong, preventing account enumeration.
+- **Audit log** — every login, register, and product create/update/delete is recorded in `audit_logs` (who, when, from which IP).
+- **Security headers** — `helmet` sets standard HTTP security headers; `cors` is scoped to the frontend origin only; request body size is capped at 10 KB as a basic DoS mitigation.
+- **No stack trace leakage** — a centralized error handler logs technical details server-side only; responses to clients always contain a generic message in production mode.
+- **First-run setup protection** — the `POST /api/auth/setup` endpoint can only be called once (when zero users exist) and is rejected afterwards.
+
+## API Endpoints
+
+| Method | Path | Access |
 |---|---|---|
-| admin@example.com | Admin123! | admin |
-
-**Ganti password ini di luar environment development.**
-
-## Fitur Security yang Diimplementasikan
-
-- **Password hashing** — bcrypt (cost factor 12), baik di Node (`bcryptjs`) maupun saat seed lewat `pgcrypto` di database.
-- **JWT auth dua-token** — access token (short-lived, in-memory di client, tidak pernah disimpan ke localStorage) + refresh token (httpOnly, `SameSite=Strict` cookie, disimpan hash-nya di tabel `refresh_tokens` supaya bisa di-revoke kapan saja, dengan token rotation tiap refresh).
-- **Role-based + ownership authorization** — admin bisa akses semua data, user biasa cuma bisa ubah/hapus produk miliknya sendiri (dicek di service layer, bukan cuma UI).
-- **Input validation** — semua request body/query/params divalidasi & disanitasi pakai Zod sebelum masuk ke business logic.
-- **SQL injection prevention** — semua query database pakai parameterized statement (`$1, $2, ...`), nggak ada string concatenation ke SQL.
-- **Account lockout** — akun terkunci otomatis 15 menit setelah 5x percobaan login gagal beruntun.
-- **Rate limiting** — endpoint auth dibatasi lebih ketat (10 req/15 menit) dibanding endpoint umum (100 req/15 menit), buat mitigasi brute-force.
-- **Generic auth error message** — pesan "email atau password salah" disamakan untuk semua kasus gagal login, supaya nggak bisa dipakai buat enumerasi akun yang terdaftar.
-- **Audit log** — setiap login, register, create/update/delete produk dicatat ke tabel `audit_logs` (siapa, kapan, dari IP mana).
-- **Security headers** — `helmet` buat header HTTP standar, `cors` dibatasi ke origin frontend saja, body size limit 10kb buat mitigasi DoS sederhana.
-- **No stack trace leak** — error handler terpusat, detail error teknis cuma dilog di server, response ke client selalu pesan generik di mode production.
-
-## API Endpoints (ringkas)
-
-| Method | Path | Akses |
-|---|---|---|
+| GET | `/api/auth/setup` | Public — returns `{ setupRequired: true/false }` |
+| POST | `/api/auth/setup` | Public — one-time admin account creation |
 | POST | `/api/auth/register` | Public |
 | POST | `/api/auth/login` | Public |
-| POST | `/api/auth/refresh` | Public (butuh cookie) |
+| POST | `/api/auth/refresh` | Public (requires cookie) |
 | POST | `/api/auth/logout` | Public |
-| GET/POST | `/api/products` | Authenticated |
-| PUT/DELETE | `/api/products/:id` | Authenticated (owner/admin) |
+| GET | `/api/products` | Authenticated |
+| POST | `/api/products` | Authenticated |
+| GET | `/api/products/:id` | Authenticated |
+| PUT | `/api/products/:id` | Authenticated (owner or admin) |
+| DELETE | `/api/products/:id` | Authenticated (owner or admin) |
 | GET | `/api/users` | Admin only |
 | PATCH | `/api/users/:id/role` | Admin only |
 | PATCH | `/api/users/:id/active` | Admin only |
-
-## Ide Pengembangan Lanjutan
-
-- Tambah 2FA (TOTP) untuk akun admin.
-- HTTPS + secure cookie wajib aktif di production (`NODE_ENV=production`).
-- Export audit log ke CSV buat keperluan laporan.
-- Soft-delete produk (kolom `deleted_at`) daripada hard delete, biar audit trail tetap utuh.
