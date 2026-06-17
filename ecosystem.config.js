@@ -4,7 +4,7 @@ module.exports = {
       name: "secure-crud-backend",
       script: "dist/server.js",
       cwd: "./backend",
-      instances: "max",
+      instances: "1",
       exec_mode: "cluster",
       node_args: "--max-old-space-size=512",
 
